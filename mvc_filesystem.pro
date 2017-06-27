@@ -25,9 +25,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    filestablemodel.cpp
+    filestablemodel.cpp \
+    filestabledelegate.cpp
 
 HEADERS  += mainwindow.h \
-    filestablemodel.h
+    filestablemodel.h \
+    filestabledelegate.h \
+    filedata.h
 
 FORMS    += mainwindow.ui

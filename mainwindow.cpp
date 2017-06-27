@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "filestablemodel.h"
+#include "filestabledelegate.h"
 
 #include <QDir>
 #include <QFileDialog>
@@ -14,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->tableView->setModel(m_model);
     ui->lineEdit->setText(QDir::currentPath());
+
+    ui->tableView->setItemDelegate(new FilesTableDelegate(ui->tableView));
 }
 
 MainWindow::~MainWindow()

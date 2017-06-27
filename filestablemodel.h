@@ -1,16 +1,21 @@
 #ifndef FILESTABLEMODEL_H
 #define FILESTABLEMODEL_H
 
-#include <QAbstractTableModel>
-#include <memory>
+#include "filedata.h"
 
-struct FilesTableModelPrivate;
+#include <vector>
+
+#include <QAbstractTableModel>
+
+class FilesTableDelegate;
 
 class FilesTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 
 public:
+    friend class FilesTableDelegate;
+
     explicit FilesTableModel(QObject *parent = 0);
     void SetPath(const QString& path);
 
@@ -24,7 +29,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 private:
-    std::unique_ptr<FilesTableModelPrivate> m_data;
+    std::vector<FileData> m_data;
 };
 
 #endif // FILESTABLEMODEL_H

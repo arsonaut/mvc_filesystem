@@ -4,22 +4,8 @@
 #include <QBrush>
 #include <QDateTime>
 
-struct FileData
-{
-    QString name;
-    bool isDirectory;
-    QString size;
-    QString date;
-};
-
-struct FilesTableModelPrivate
-{
-    std::vector<FileData> files;
-};
-
 FilesTableModel::FilesTableModel(QObject *parent)
     : QAbstractTableModel(parent)
-    , m_data(new FilesTableModelPrivate)
 {
 
 }
@@ -28,16 +14,18 @@ void FilesTableModel::SetPath(const QString& path)
 {
     beginResetModel();
 
-    m_data->files.clear();
+    m_data.clear();
 
     QDirIterator dirIter(path);
     while (dirIter.hasNext())
     {
         dirIter.next();
         const QFileInfo& fileInfo = dirIter.fileInfo();
-        m_data->files.emplace_back(FileData{fileInfo.fileName(), fileInfo.isDir(),
-                                            QString("%L1").arg(fileInfo.size()),
-                                            fileInfo.lastModified().toString("dd-MM-yyyy")});
+        m_data.emplace_back(FileData{fileInfo.completeBaseName(),
+                                     fileInfo.suffix(),
+                                     fileInfo.isDir(),
+                                     QString("%L1").arg(fileInfo.size()),
+                                     fileInfo.lastModified().toString("dd-MM-yyyy")});
     }
 
     endResetModel();
@@ -79,7 +67,7 @@ int FilesTableModel::rowCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
-    return m_data->files.size();
+    return m_data.size();
 }
 
 int FilesTableModel::columnCount(const QModelIndex &parent) const
@@ -96,37 +84,10 @@ QVariant FilesTableModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     const int row = index.row();
-    if (row >= 0 && row < m_data->files.size())
+    if (row >= 0 && static_cast<size_t>(row) < m_data.size() && role == Qt::DisplayRole)
     {
-        const FileData& fileData = m_data->files[row];
-        switch (role) {
-        case Qt::DisplayRole:
-            switch (index.column()) {
-            case 0:
-                return fileData.name;
-            case 1:
-                return fileData.isDirectory ? QString("<Folder>") : fileData.size;
-            case 2:
-                return fileData.date;
-            }
-
-        case Qt::TextAlignmentRole:
-            switch (index.column()) {
-            case 0:
-                return Qt::AlignLeft;
-            case 1:
-            case 2:
-                return Qt::AlignRight;
-            }
-
-        case Qt::BackgroundRole:
-            return QBrush(Qt::darkBlue);
-
-        case Qt::ForegroundRole:
-            return QBrush(fileData.isDirectory ? Qt::white : Qt::cyan);
-        }
+        return QVariant::fromValue(m_data[row]);
     }
 
-    // FIXME: Implement me!
     return QVariant();
 }
